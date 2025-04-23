@@ -1,0 +1,27 @@
+<!-- templates/admin_answer_stats.html -->
+{% extends 'base.html' %}
+{% block title %}답변자별 답변수 통계 | 관리자{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">답변자별 답변수 통계</h2>
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>순위</th>
+        <th>닉네임</th>
+        <th>답변 수</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in stats %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ row[0] or '익명' }}</td>
+        <td>{{ row[1] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="/" class="btn btn-link">메인으로</a>
+</div>
+{% endblock %}

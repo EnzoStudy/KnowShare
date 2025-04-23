@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}{{ question.title }} | 지식인 QnA{% endblock %}
+{% block content %}
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">
+<div class="row justify-content-center">
+  <div class="col-md-10 col-lg-8">
+    <!-- 질문 카드 -->
+    <div class="kin-card mb-4 shadow-sm border-0 p-4 position-relative">
+      <div class="d-flex align-items-center mb-2">
+        <span class="badge bg-info text-dark me-2"><span class="material-icons-outlined align-middle" style="font-size:1em;vertical-align:-2px;">label_important</span> {{ question.category }}</span>
+        <span class="material-icons-outlined text-secondary" style="font-size:1.3em;">person</span>
+        <span class="ms-1 fw-bold">{{ question.nickname or '익명' }}</span>
+        <span class="ms-3 text-muted small"><span class="material-icons-outlined align-middle" style="font-size:1.1em;">schedule</span> {{ question.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+      </div>
+      <h2 class="fw-bold mb-3">{{ question.title }}
+  {% if question.delete_token == request.cookies.get('qna_token') %}
+
+    <form method="post" action="{{ url_for('delete_question', qid=question.id) }}" style="display:inline;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="btn btn-outline-danger btn-sm ms-1" onclick="return confirm('정말 삭제하시겠습니까?');"><span class="material-icons-outlined align-middle">delete</span> 삭제</button>
+    </form>
+  {% endif %}
+</h2>
+      <div class="mb-3 fs-5">{{ question.content }}</div>
+      <!-- 이미지 첨부 영역(향후 확장) -->
+      {% if question.image_url %}
+      <div class="mb-3"><img src="{{ question.image_url }}" class="img-fluid rounded border" style="max-height:320px;object-fit:contain;" alt="질문 이미지"></div>
+      {% endif %}
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <span class="badge bg-primary"><span class="material-icons-outlined align-middle" style="font-size:1em;">visibility</span> {{ question.views }}</span>
+        <span class="badge bg-info text-dark"><span class="material-icons-outlined align-middle" style="font-size:1em;">question_answer</span> {{ answers|length }}</span>
+      </div>
+    </div>
+    <!-- 답변 목록 -->
+    <div class="mb-4">
+      <div class="d-flex align-items-center mb-3">
+        <span class="material-icons-outlined text-primary me-1">chat_bubble_outline</span>
+        <h4 class="mb-0">답변 <span class="badge bg-light text-dark ms-1">{{ answers|length }}</span></h4>
+      </div>
+      {% if answers %}
+        <div class="timeline">
+        {% for a in answers %}
+          <div class="timeline-item mb-4">
+            <div class="kin-answer p-3 rounded shadow-sm bg-white border position-relative {% if a.is_selected %}border-success border-3{% endif %}">
+              <div class="d-flex align-items-center mb-2">
+                <span class="material-icons-outlined text-secondary" style="font-size:1.2em;">person</span>
+                <span class="ms-1 fw-bold">{{ a.nickname or '익명' }}</span>
+                <span class="ms-3 text-muted small"><span class="material-icons-outlined align-middle" style="font-size:1.1em;">schedule</span> {{ a.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                {% if a.is_selected %}
+                  <span class="badge bg-success ms-3"><span class="material-icons-outlined align-middle">check_circle</span> 채택됨</span>
+                {% endif %}
+              </div>
+              <div class="fs-6">{{ a.content }}
+  {% if a.delete_token == request.cookies.get('qna_token') %}
+
+    <form method="post" action="{{ url_for('delete_answer', aid=a.id) }}" style="display:inline;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="btn btn-outline-danger btn-sm ms-1" onclick="return confirm('정말 삭제하시겠습니까?');"><span class="material-icons-outlined align-middle">delete</span> 삭제</button>
+    </form>
+  {% endif %}
+</div>
+              {% if a.image_url %}
+              <div class="mt-2"><img src="{{ a.image_url }}" class="img-fluid rounded border" style="max-height:180px;object-fit:contain;" alt="답변 이미지"></div>
+              {% endif %}
+              {% if not a.is_selected and question.nickname==nickname %}
+                <form method="post" action="{{ url_for('select_answer', aid=a.id) }}" class="mt-2">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="btn btn-outline-success btn-sm"><span class="material-icons-outlined align-middle">check_circle</span> 이 답변 채택하기</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-info text-center">아직 답변이 없습니다.</div>
+      {% endif %}
+    </div>
+    <!-- 답변 작성 -->
+    <div class="kin-card p-4 mt-4 shadow-sm border-0">
+      <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div class="mb-3">
+          <label for="answerContent" class="form-label fw-bold">답변 작성</label>
+          <textarea name="content" id="answerContent" class="form-control" rows="5" placeholder="내용을 입력하세요" required></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="answerImage" class="form-label">이미지 첨부 (선택, 최대 2MB, jpg/png/gif)</label>
+          <input type="file" name="image" id="answerImage" class="form-control" accept="image/*" onchange="previewImage(event)">
+          <img id="preview" class="img-fluid rounded mt-2 d-none" style="max-height:180px;object-fit:contain;" />
+        </div>
+        <button type="submit" class="btn btn-success px-4 fw-bold"><span class="material-icons-outlined align-middle">send</span> 답변 등록</button>
+        <a href="/" class="btn btn-link">목록으로</a>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+function previewImage(event) {
+  const preview = document.getElementById('preview');
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      preview.classList.remove('d-none');
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.src = '';
+    preview.classList.add('d-none');
+  }
+}
+</script>
+<style>
+.timeline { border-left: 3px solid #e3e3e3; margin-left: 1.2rem; }
+.timeline-item { position: relative; }
+.timeline-item:before {
+  content: '';
+  position: absolute;
+  left: -1.36rem;
+  top: 1.2rem;
+  width: 16px;
+  height: 16px;
+  background: #03c75a;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px #e3e3e3;
+}
+</style>
+{% endblock %}

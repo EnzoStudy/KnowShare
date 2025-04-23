@@ -1,0 +1,35 @@
+<!-- templates/admin_reports.html -->
+{% extends 'base.html' %}
+{% block title %}신고 내역 | 관리자{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">신고 내역</h2>
+  {% if reports %}
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>번호</th>
+        <th>타입</th>
+        <th>대상 ID</th>
+        <th>사유</th>
+        <th>신고일시</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in reports %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ r.target_type }}</td>
+        <td>{{ r.target_id }}</td>
+        <td>{{ r.reason }}</td>
+        <td>{{ r.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="text-center">신고 내역이 없습니다.</p>
+  {% endif %}
+  <a href="/" class="btn btn-link">메인으로</a>
+</div>
+{% endblock %}

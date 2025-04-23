@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}익명 QnA{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Noto Sans KR -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { background: #f6f8fa; font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', '맑은 고딕', 'Malgun Gothic', '돋움', Dotum, Arial, sans-serif; }
+        .nav-kin { background: #03c75a; color: #fff; padding: 1rem 0; margin-bottom: 2rem; }
+        .nav-kin .container { display: flex; align-items: center; }
+        .nav-kin h1 { font-size: 2rem; margin: 0; font-weight: bold; letter-spacing: -2px; }
+        .kin-search { margin-left: auto; }
+        .kin-search input { border-radius: 2rem; border: none; padding: 0.5rem 1rem; width: 250px; }
+        .kin-card { background: #fff; border: 1px solid #e3e3e3; border-radius: 12px; margin-bottom: 1.2rem; box-shadow: 0 2px 6px rgba(0,0,0,0.03); padding: 1.2rem; }
+        .kin-btn { background: #03c75a; color: #fff; border: none; border-radius: 2rem; padding: 0.4rem 1.5rem; font-weight: bold; }
+        .kin-btn:hover { background: #029e47; }
+        .kin-meta { color: #888; font-size: 0.95rem; }
+        .kin-answer { background: #f2fff6; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+        .kin-question { font-weight: bold; font-size: 1.2rem; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav class="nav-kin">
+        <div class="container">
+            <h1><a href="/" style="color:#fff;text-decoration:none;">지식인 QnA</a></h1>
+            <form class="kin-search" method="get" action="/">
+                <input type="text" name="search" placeholder="궁금한 것을 검색하세요" value="{{ request.args.get('search', '') }}">
+            </form>
+            <div class="ms-3 d-flex align-items-center">
+                <span style="color:#fff;font-weight:bold;">{{ nickname or '익명' }}</span>
+                <a href="/nickname" class="btn btn-light btn-sm ms-2" style="border-radius:1.5rem;font-weight:bold;">닉네임 설정</a>
+                <div class="dropdown ms-2">
+                  <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" id="adminMenu" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius:1.5rem;font-weight:bold;">
+                    관리자 메뉴
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="adminMenu">
+                    <li><a class="dropdown-item" href="/admin/answer_stats">답변자 통계</a></li>
+                    <li><a class="dropdown-item" href="/admin/categories">카테고리 관리</a></li>
+<li><a class="dropdown-item" href="/admin/reports">신고 내역</a></li>
+                  </ul>
+                </div>
+                {% if session.ms_name %}
+                  <a href="/logout" class="btn btn-warning btn-sm ms-2" style="border-radius:1.5rem;font-weight:bold;">로그아웃</a>
+                {% else %}
+                  <a href="/login/ms" class="btn btn-primary btn-sm ms-2" style="border-radius:1.5rem;font-weight:bold;">MS 로그인</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-info">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

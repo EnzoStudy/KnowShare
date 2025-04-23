@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}질문하기 | 지식인 QnA{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="kin-card">
+            <h2 class="mb-3">질문하기</h2>
+            <form method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="mb-3">
+                    <select name="category" class="form-select mb-2" required>
+                        {% for cat in category_list %}
+                        <option value="{{ cat }}" {% if request.form.get('category', '자유') == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" name="title" class="form-control" placeholder="제목" required>
+                </div>
+                <div class="mb-3">
+                    <textarea name="content" class="form-control" rows="6" placeholder="내용을 입력하세요" required></textarea>
+                </div>
+                <button type="submit" class="kin-btn">등록</button>
+                <a href="/" class="btn btn-link">목록으로</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

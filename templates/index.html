@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}지식인 QnA - 질문 목록{% endblock %}
+{% block content %}
+<!-- Hero Section -->
+<div class="py-5 mb-5 position-relative" style="background: linear-gradient(90deg, #03c75a 0%, #00b8d9 100%); border-radius: 2rem; overflow: hidden;">
+  <div class="container position-relative z-2">
+    <div class="row align-items-center">
+      <div class="col-md-8 text-white">
+        <h1 class="display-4 fw-bold mb-3" style="letter-spacing:-2px;">익명 QnA 커뮤니티</h1>
+        <p class="lead mb-4">궁금한 점을 자유롭게 묻고, 지식을 나누세요.<br>로그인 없이, MS 계정으로, 누구나 쉽게!</p>
+        <a href="/ask" class="btn btn-warning btn-lg px-4 me-2 shadow-sm fw-bold">질문하기</a>
+        <a href="/login/ms" class="btn btn-outline-light btn-lg px-4 fw-bold">MS 로그인</a>
+      </div>
+      <div class="col-md-4 text-end d-none d-md-block">
+        <span class="material-icons-outlined" style="font-size:7rem;opacity:0.2;">question_answer</span>
+      </div>
+    </div>
+  </div>
+  <span class="position-absolute top-0 start-0 w-100 h-100 z-1" style="background:url('https://www.transparenttextures.com/patterns/diamond-upholstery.png');opacity:0.08;"></span>
+</div>
+
+<div class="container">
+  <div class="row">
+    <!-- 카테고리 & 인기 위젯 -->
+    <div class="col-lg-3 mb-4">
+      <div class="kin-card mb-4 p-0 overflow-hidden">
+        <h5 class="mb-3 p-3 pb-2 border-bottom bg-light"><span class="material-icons align-middle text-primary">label</span> 카테고리</h5>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item {% if not category %}active{% endif %}">
+            <a href="/?{% if search %}search={{ search }}&{% endif %}" class="text-decoration-none text-reset fw-bold"><span class="material-icons-outlined align-middle">apps</span> 전체</a>
+          </li>
+          {% for cat in category_list %}
+          <li class="list-group-item {% if category == cat %}active{% endif %}">
+            <a href="/?category={{ cat }}{% if search %}&search={{ search }}{% endif %}" class="text-decoration-none text-reset"><span class="badge bg-info text-dark me-2"><span class="material-icons-outlined align-middle" style="font-size:1em;vertical-align:-2px;">label_important</span> {{ cat[0] }}</span>{{ cat }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <!-- 인기 카테고리/질문 위젯 예시 (추후 확장 가능) -->
+      <div class="kin-card bg-gradient p-3" style="background: linear-gradient(120deg,#e0ffe8 0,#f2fcff 100%);">
+        <div class="fw-bold mb-2"><span class="material-icons-outlined align-middle text-warning">star</span> 인기 카테고리</div>
+        <div class="d-flex flex-wrap gap-2">
+          {% for cat in category_list[:3] %}
+          <span class="badge rounded-pill bg-warning text-dark px-3 py-2">#{{ cat }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <!-- 질문 목록 -->
+    <div class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="btn-group" role="group" aria-label="채택 필터">
+    <a href="/?{{ 'category=' + category + '&' if category }}{{ 'search=' + search + '&' if search }}" class="btn btn-outline-primary btn-sm{% if not request.args.get('solved') %} active{% endif %}"><span class="material-icons-outlined align-middle">list</span> 전체</a>
+    <a href="/?{{ 'category=' + category + '&' if category }}{{ 'search=' + search + '&' if search }}solved=0" class="btn btn-outline-success btn-sm{% if request.args.get('solved') == '0' %} active{% endif %}"><span class="material-icons-outlined align-middle">help_outline</span> 미해결</a>
+  </div>
+        <h2 class="mb-0"><span class="material-icons-outlined align-middle text-primary">question_answer</span> 최신 질문</h2>
+        <a href="/ask" class="btn btn-success btn-lg fw-bold shadow-sm"><span class="material-icons-outlined align-middle">edit</span> 질문하기</a>
+      </div>
+      <!-- 검색어 입력: 항상 상단에 노출 -->
+      <form method="get" class="row g-2 align-items-end mb-4">
+        <div class="col-md-6 col-lg-5">
+          <label for="search" class="form-label mb-1">검색어</label>
+          <div class="input-group">
+            <input type="text" id="search" name="search" value="{{ search }}" class="form-control" placeholder="검색어 입력">
+            <button type="submit" class="btn btn-primary"><span class="material-icons-outlined align-middle">search</span> 검색</button>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+              <span class="material-icons-outlined align-middle">tune</span> 필터검색
+            </button>
+          </div>
+        </div>
+      </form>
+      <!-- 필터 영역: collapse로 숨김/표시 -->
+      <form method="get" class="collapse mb-4" id="filterCollapse">
+        <div class="row g-2 align-items-end">
+          <input type="hidden" name="search" value="{{ search }}">
+          <div class="col-md-2">
+            <label for="search_type" class="form-label mb-1">검색옵션</label>
+            <select id="search_type" name="search_type" class="form-select">
+              <option value="title" {% if search_type=='title' %}selected{% endif %}>제목</option>
+              <option value="nickname" {% if search_type=='nickname' %}selected{% endif %}>작성자</option>
+              <option value="date" {% if search_type=='date' %}selected{% endif %}>날짜</option>
+              <option value="all" {% if search_type=='all' %}selected{% endif %}>제목+내용</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label for="nickname" class="form-label mb-1">작성자 선택</label>
+            <select id="nickname" name="nickname" class="form-select">
+              <option value="">전체</option>
+              {% for n in nickname_list %}
+              <option value="{{ n }}" {% if nickname_filter==n %}selected{% endif %}>{{ n }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label for="date" class="form-label mb-1">날짜(YYYY-MM-DD)</label>
+            <input type="date" id="date" name="date" value="{{ date_filter }}" class="form-control">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label mb-1">&nbsp;</label>
+            <button type="submit" class="btn btn-success w-100"><span class="material-icons-outlined align-middle">search</span> 필터검색</button>
+          </div>
+        </div>
+      </form>
+      {% if questions %}
+        <div class="row g-4">
+        {% for q in questions %}
+          <div class="col-md-6 col-xl-4">
+            <div class="kin-card h-100 shadow-sm border-0 position-relative" style="transition:box-shadow .2s;">
+              <a href="/question/{{ q.id }}" class="stretched-link text-decoration-none text-dark">
+                <div class="d-flex align-items-center mb-2">
+                  <span class="badge bg-info text-dark me-2"><span class="material-icons-outlined align-middle" style="font-size:1em;vertical-align:-2px;">label_important</span> {{ q.category }}</span>{% if q.answers|selectattr('is_selected')|list %}<span class="material-icons-outlined text-success ms-1" style="vertical-align:-3px;font-size:1.2em;">check_circle</span>{% endif %}
+                  <span class="material-icons-outlined text-secondary" style="font-size:1.3em;">person</span>
+                  <span class="ms-1 small">{{ q.nickname or '익명' }}</span>
+                </div>
+                <div class="fw-bold fs-5 mb-2 text-truncate" title="{{ q.title }}">{{ q.title }}</div>
+                <div class="mb-2 text-muted text-truncate" style="font-size:1em;max-width:95%;">{{ q.content[:60] }}{% if q.content|length > 60 %}...{% endif %}</div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <div class="text-muted small"><span class="material-icons-outlined align-middle" style="font-size:1.1em;">schedule</span> {{ q.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                  <div>
+                    <span class="badge bg-primary"><span class="material-icons-outlined align-middle" style="font-size:1em;">visibility</span> {{ q.views }}</span>
+                    <span class="badge bg-info text-dark"><span class="material-icons-outlined align-middle" style="font-size:1em;">question_answer</span> {{ q.answer_count }}</span>
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-info text-center py-5">아직 등록된 질문이 없습니다.<br><a href="/ask" class="btn btn-success mt-3 px-4 py-2 fw-bold">첫 질문 등록하기</a></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+<!-- Material Icons CDN -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">
+<style>
+.kin-card { transition: box-shadow .2s; }
+.kin-card:hover { box-shadow:0 4px 24px rgba(0,0,0,0.08)!important; }
+.bg-gradient { background: linear-gradient(120deg,#e0ffe8 0,#f2fcff 100%)!important; }
+</style>
+{% endblock %}

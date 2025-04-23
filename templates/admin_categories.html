@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}카테고리 관리 | 관리자{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">카테고리 관리</h2>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="mb-3">
+      <label for="categoryList" class="form-label">카테고리 목록 (쉼표로 구분)</label>
+      <input type="text" class="form-control" id="categoryList" name="category_list" value="{{ category_list|join(', ') }}" required>
+    </div>
+    <button type="submit" class="btn btn-success">저장</button>
+    <a href="/" class="btn btn-link">메인으로</a>
+  </form>
+</div>
+{% endblock %}
